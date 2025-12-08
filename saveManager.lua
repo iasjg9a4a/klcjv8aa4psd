@@ -10,7 +10,7 @@ local SaveManager = {} do
 			end,
 			Load = function(idx, data)
 				if Toggles[idx] then
-					if data.value == false then return end
+					if data.value == false and not Toggles[idx].Value then return end
 					Toggles[idx]:SetValue(data.value)
 				end
 			end,
