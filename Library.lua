@@ -1,3 +1,5 @@
+local Library = nil
+xpcall(function()
 local game = game
 local getgenv, getrawmetatable, getupvalue, gethiddenproperty, cloneref, clonefunction = getgenv, getrawmetatable, debug.getupvalue, gethiddenproperty, cloneref or function(...)
 	return ...
@@ -81,7 +83,7 @@ local Options = {};
 getgenv().Toggles = Toggles;
 getgenv().Options = Options;
 
-local Library = {
+Library = {
     Registry = {};
     RegistryMap = {};
 
@@ -3540,4 +3542,8 @@ local function OnPlayerChange()
 end;
 
 getgenv().Library = Library
-return Library
+end,
+function(...) warn(...) end)
+if Library then
+	return Library
+end
