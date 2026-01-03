@@ -192,7 +192,7 @@ local SaveManager = {} do
 		local out = {}
 		for i = 1, #list do
 			local file = list[i]
-			if file:sub(-5) == '.json' then
+			if file:sub(-5) == '.json' and not file:find('autoload_accounts.json', 1, true) then
 				-- i hate this but it has to be done ...
 
 				local pos = file:find('.json', 1, true)
@@ -322,7 +322,7 @@ local SaveManager = {} do
 		
 		    data.accounts[account] = name
 		    self:WriteAccountAutoloads(data)
-		
+			SaveManager.AccountAutoloadLabel:SetText('Current autoload config on this account: ' .. name)
 		    self.Library:Notify(
 		        string.format('Set %q to auto load for account %q', name, account)
 		    )
@@ -335,10 +335,21 @@ local SaveManager = {} do
 		end)
 
 		SaveManager.AutoloadLabel = section:AddLabel('Current autoload config: none', true)
+		SaveManager.AccountAutoloadLabel = section:AddLabel('Current autoload config on this account: none', true)
 
 		if isfile(self.Folder .. '/settings/autoload.txt') then
 			local name = readfile(self.Folder .. '/settings/autoload.txt')
 			SaveManager.AutoloadLabel:SetText('Current autoload config: ' .. name)
+		end
+
+		do
+		    local data = self:ReadAccountAutoloads()
+		    local account = self:GetAccountName()
+		    local cfg = data.accounts[account]
+		
+		    if cfg then
+		        SaveManager.AccountAutoloadLabel:SetText('Current autoload config on this account: ' .. cfg)
+		    end
 		end
 
 		SaveManager:SetIgnoreIndexes({ 'SaveManager_ConfigList', 'SaveManager_ConfigName' })
