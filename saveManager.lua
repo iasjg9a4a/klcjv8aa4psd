@@ -307,9 +307,11 @@ local SaveManager = {} do
 		section:AddButton('Autoload config', function()
 			local name = Options.SaveManager_ConfigList.Value
 			writefile(self.Folder .. '/settings/autoload.txt', name)
-			SaveManager.AutoloadLabel:SetText('Current autoload config: ' .. name)
+			SaveManager.AutoloadLabel:SetText('Global autoload config: ' .. name)
 			self.Library:Notify(string.format('Set %q to auto load', name))
-		end):AddButton('Autoload for this account', function()
+		end)
+		
+		section:AddButton('Autoload for this account', function()
 		    local name = Options.SaveManager_ConfigList.Value
 		    if not name then
 		        return self.Library:Notify('No config selected', 2)
@@ -320,10 +322,8 @@ local SaveManager = {} do
 		
 		    data.accounts[account] = name
 		    self:WriteAccountAutoloads(data)
-			SaveManager.AccountAutoloadLabel:SetText('Current autoload config on this account: ' .. name)
-		    self.Library:Notify(
-		        string.format('Set %q to auto load for account %q', name, account)
-		    )
+			SaveManager.AccountAutoloadLabel:SetText(account.." autoload config: ' .. name)
+		    self.Library:Notify(string.format('Set %q to auto load for account %q', name, account))
 		end)
 
 		section:AddButton('Refresh config list', function()
@@ -339,9 +339,11 @@ local SaveManager = {} do
 		        delfile(path)
 		    end
 		
-		    SaveManager.AutoloadLabel:SetText('Current autoload config: none')
+		    SaveManager.AutoloadLabel:SetText('Global autoload config: none')
 		    self.Library:Notify('Global autoload cleared')
-		end):AddButton('Clear account autoload', function()
+		end)
+		
+		section:AddButton('Clear account autoload', function()
 		    local data = self:ReadAccountAutoloads()
 		    local account = self:GetAccountName()
 		
@@ -350,18 +352,14 @@ local SaveManager = {} do
 		        self:WriteAccountAutoloads(data)
 		    end
 		
-		    SaveManager.AccountAutoloadLabel:SetText(
-		        'Current autoload config on this account: none'
-		    )
+		    SaveManager.AccountAutoloadLabel:SetText(account.." autoload config: none')
 		
-		    self.Library:Notify(
-		        string.format('Account autoload cleared for %q', account)
-		    )
+		    self.Library:Notify(string.format('Account autoload cleared for %q', account))
 		end)
 
 
-		SaveManager.AutoloadLabel = section:AddLabel('Current autoload config: none', true)
-		SaveManager.AccountAutoloadLabel = section:AddLabel('Current autoload config on this account: none', true)
+		SaveManager.AutoloadLabel = section:AddLabel('Global autoload config: none', true)
+		SaveManager.AccountAutoloadLabel = section:AddLabel(SaveManager:GetAccountName().." autoload config: none', true)
 
 		if isfile(self.Folder .. '/settings/autoload.txt') then
 			local name = readfile(self.Folder .. '/settings/autoload.txt')
