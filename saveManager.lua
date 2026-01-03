@@ -132,6 +132,38 @@ local SaveManager = {} do
 		return true
 	end
 
+	function SaveManager:GetAccountName()
+	    local player = game:GetService("Players").LocalPlayer
+	    return player and player.Name or "Unknown"
+	end
+	
+	function SaveManager:GetAccountAutoloadPath()
+	    return self.Folder .. "/settings/autoload_accounts.json"
+	end
+	
+	function SaveManager:ReadAccountAutoloads()
+	    local path = self:GetAccountAutoloadPath()
+	
+	    if not isfile(path) then
+	        return { accounts = {} }
+	    end
+	
+	    local success, data = pcall(httpService.JSONDecode, httpService, readfile(path))
+	    if not success or type(data) ~= "table" then
+	        return { accounts = {} }
+	    end
+	
+	    data.accounts = data.accounts or {}
+	    return data
+	end
+	
+	function SaveManager:WriteAccountAutoloads(data)
+	    writefile(
+	        self:GetAccountAutoloadPath(),
+	        httpService:JSONEncode(data)
+	    )
+	end
+
 	function SaveManager:IgnoreThemeSettings()
 		self:SetIgnoreIndexes({ 
 			"BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor", -- themes
@@ -186,17 +218,41 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:LoadAutoloadConfig()
-		if isfile(self.Folder .. '/settings/autoload.txt') then
-			local name = readfile(self.Folder .. '/settings/autoload.txt')
+	    local account = self:GetAccountName()
+	
 
-			local success, err = self:Load(name)
-			if not success then
-				return self.Library:Notify('Failed to load autoload config: ' .. err)
-			end
+	    local accountPath = self:GetAccountAutoloadPath()
+	    if isfile(accountPath) then
+	        local data = self:ReadAccountAutoloads()
+	        local cfg = data.accounts[account]
+	
+	        if cfg then
+	            local success, err = self:Load(cfg)
+	            if success then
+	                return self.Library:Notify(
+	                    string.format('Auto loaded account config %q', cfg)
+	                )
+	            else
+	                return self.Library:Notify(
+	                    'Failed to load account autoload config: ' .. err
+	                )
+	            end
+	        end
+	    end
+	
 
-			self.Library:Notify(string.format('Auto loaded config %q', name))
-		end
+	    local globalPath = self.Folder .. '/settings/autoload.txt'
+	    if isfile(globalPath) then
+	        local name = readfile(globalPath)
+	        local success, err = self:Load(name)
+	        if success then
+	            self.Library:Notify(string.format('Auto loaded config %q', name))
+	        else
+	            self.Library:Notify('Failed to load autoload config: ' .. err)
+	        end
+	    end
 	end
+
 
 
 	function SaveManager:BuildConfigSection(tab)
@@ -253,6 +309,23 @@ local SaveManager = {} do
 			writefile(self.Folder .. '/settings/autoload.txt', name)
 			SaveManager.AutoloadLabel:SetText('Current autoload config: ' .. name)
 			self.Library:Notify(string.format('Set %q to auto load', name))
+		end)
+
+		section:AddButton('Autoload for this account', function()
+		    local name = Options.SaveManager_ConfigList.Value
+		    if not name then
+		        return self.Library:Notify('No config selected', 2)
+		    end
+		
+		    local data = self:ReadAccountAutoloads()
+		    local account = self:GetAccountName()
+		
+		    data.accounts[account] = name
+		    self:WriteAccountAutoloads(data)
+		
+		    self.Library:Notify(
+		        string.format('Set %q to auto load for account %q', name, account)
+		    )
 		end)
 
 		section:AddButton('Refresh config list', function()
