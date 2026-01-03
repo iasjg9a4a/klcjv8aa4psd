@@ -322,7 +322,7 @@ local SaveManager = {} do
 		
 		    data.accounts[account] = name
 		    self:WriteAccountAutoloads(data)
-			SaveManager.AccountAutoloadLabel:SetText(account.." autoload config: ' .. name)
+			SaveManager.AccountAutoloadLabel:SetText(account.." autoload config: " .. name)
 		    self.Library:Notify(string.format('Set %q to auto load for account %q', name, account))
 		end)
 
@@ -352,18 +352,18 @@ local SaveManager = {} do
 		        self:WriteAccountAutoloads(data)
 		    end
 		
-		    SaveManager.AccountAutoloadLabel:SetText(account.." autoload config: none')
+		    SaveManager.AccountAutoloadLabel:SetText(account.." autoload config: none")
 		
 		    self.Library:Notify(string.format('Account autoload cleared for %q', account))
 		end)
 
 
 		SaveManager.AutoloadLabel = section:AddLabel('Global autoload config: none', true)
-		SaveManager.AccountAutoloadLabel = section:AddLabel(SaveManager:GetAccountName().." autoload config: none', true)
+		SaveManager.AccountAutoloadLabel = section:AddLabel(SaveManager:GetAccountName().." autoload config: none", true)
 
 		if isfile(self.Folder .. '/settings/autoload.txt') then
 			local name = readfile(self.Folder .. '/settings/autoload.txt')
-			SaveManager.AutoloadLabel:SetText('Current autoload config: ' .. name)
+			SaveManager.AutoloadLabel:SetText('Global autoload config: ' .. name)
 		end
 
 		do
@@ -372,7 +372,7 @@ local SaveManager = {} do
 		    local cfg = data.accounts[account]
 		
 		    if cfg then
-		        SaveManager.AccountAutoloadLabel:SetText('Current autoload config on this account: ' .. cfg)
+		        SaveManager.AccountAutoloadLabel:SetText(SaveManager:GetAccountName().." autoload config: " .. cfg)
 		    end
 		end
 
