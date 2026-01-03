@@ -309,9 +309,7 @@ local SaveManager = {} do
 			writefile(self.Folder .. '/settings/autoload.txt', name)
 			SaveManager.AutoloadLabel:SetText('Current autoload config: ' .. name)
 			self.Library:Notify(string.format('Set %q to auto load', name))
-		end)
-
-		section:AddButton('Autoload for this account', function()
+		end):AddButton('Autoload for this account', function()
 		    local name = Options.SaveManager_ConfigList.Value
 		    if not name then
 		        return self.Library:Notify('No config selected', 2)
@@ -333,6 +331,34 @@ local SaveManager = {} do
 			Options.SaveManager_ConfigList:SetValues()
 			Options.SaveManager_ConfigList:SetValue(nil)
 		end)
+
+		section:AddButton('Clear global autoload', function()
+		    local path = self.Folder .. '/settings/autoload.txt'
+		
+		    if isfile(path) then
+		        delfile(path)
+		    end
+		
+		    SaveManager.AutoloadLabel:SetText('Current autoload config: none')
+		    self.Library:Notify('Global autoload cleared')
+		end):AddButton('Clear account autoload', function()
+		    local data = self:ReadAccountAutoloads()
+		    local account = self:GetAccountName()
+		
+		    if data.accounts[account] then
+		        data.accounts[account] = nil
+		        self:WriteAccountAutoloads(data)
+		    end
+		
+		    SaveManager.AccountAutoloadLabel:SetText(
+		        'Current autoload config on this account: none'
+		    )
+		
+		    self.Library:Notify(
+		        string.format('Account autoload cleared for %q', account)
+		    )
+		end)
+
 
 		SaveManager.AutoloadLabel = section:AddLabel('Current autoload config: none', true)
 		SaveManager.AccountAutoloadLabel = section:AddLabel('Current autoload config on this account: none', true)
